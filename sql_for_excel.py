@@ -3,8 +3,8 @@
 
 # @File: sql_for_excel.py
 # @Time: 2023/06/26 09:35:00
-# @Author: Robert
-# @Contact: 891581750@qq.com
+# @Author: robertqian
+# @Contact: robertqian@live.com
 # @Licence: MIT
 # @Desc: None
 
@@ -13,15 +13,15 @@ import os
 import pandas
 from pathlib import Path
 import sqlite3
-# import markdown
 import logging
 import time
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTreeWidgetItem, QTableWidgetItem, QMessageBox, QMenu, QAction
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QCursor, QIcon
+from PyQt5.QtGui import QCursor, QIcon, QDragEnterEvent, QDropEvent
 from collections import namedtuple
 from enum import Enum
 from main_window import Ui_MainWindow
+from sql_highlighter import SqlHighlighter
 
 # 设置日志参数
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -38,12 +38,12 @@ TreeNodeData = namedtuple('TreeNodeData', ['node_type', 'value'])
 
 class MyApp(QMainWindow, Ui_MainWindow):
     def __init__(self) -> None:
-        QApplication.__init__(self)
+        super(__class__, self).__init__()
         self.setupUi(self)
+        self._highlighter = SqlHighlighter(self.plainTextSql)
         self._base_path = Path(__file__).parent
         self._icons_path = self._base_path / 'icons'
-        self.setWindowIcon(QIcon(str(self._icons_path / 'main.svg')))
-        self._bind_ui_events()
+        self._setup_ui_data()
         # 创建数据库
         self._conn = sqlite3.connect(':memory:')
         # self._conn = sqlite3.connect(self._base_path / 'test.db') # 调试先用本地数据库好查看 debug
@@ -54,14 +54,13 @@ class MyApp(QMainWindow, Ui_MainWindow):
     def __del__(self) -> None:
         self._conn.close()
     
-    def _bind_ui_events(self) -> None:
+    def _setup_ui_data(self) -> None:
+        # 窗口图标
+        self.setWindowIcon(QIcon(str(self._icons_path / 'main.svg')))
         # 文件和表树
         self.treeWidgetExcelsAndSheets.setColumnCount(2)
         self.treeWidgetExcelsAndSheets.setHeaderLabels(['名称', '类型'])
         self.treeWidgetExcelsAndSheets.setColumnWidth(0, 300)
-        self.treeWidgetExcelsAndSheets.setContextMenuPolicy(Qt.CustomContextMenu) # 打开右键菜单策略
-        # 绑定菜单事件
-        self.treeWidgetExcelsAndSheets.customContextMenuRequested.connect(self._treeWidgetItem_popContextMenu)
         # 菜单选项
         self._contextMenu = {
             TreeNodeType.File: [
@@ -78,14 +77,6 @@ class MyApp(QMainWindow, Ui_MainWindow):
                 ('"字段名称", 插入到SQL', self._treeWidgetItem_popContextMenu_InsertFieldNameWithComma),
             ],
         }
-        # Excel文件和表
-        self.pushButtonImportFile.clicked.connect(self.pushButtonImportFile_clicked)
-        # SQL
-        self.pushButtonFormatSql.clicked.connect(self.pushButtonFormatSql_clicked)
-        self.pushButtonRunSql.clicked.connect(self.pushButtonRunSql_clicked)
-        self.textEditSql.textChanged.connect(self.textEditSql_textChanged)
-        # 执行结果
-        self.pushButtonExportResult.clicked.connect(self.pushButtonExportResult_clicked)
 
     def _treeWidgetItem_popContextMenu_ShowInDir(self, currentItem) -> None:
             '''在文件夹中查看文件'''
@@ -101,12 +92,13 @@ class MyApp(QMainWindow, Ui_MainWindow):
         '''从列表中移除此文件'''
         file_name = currentItem.data(0, Qt.UserRole).value
         self._remove_excel_node(currentItem)
+        self._update_tables_name()
         self.statusbar.showMessage(f'从列表中移除文件成功！【{file_name}】')
     
     def _treeWidgetItem_popContextMenu_InsertSheetName(self, currentItem) -> None:
         '''表名称插入到SQL'''
         sheet_name = currentItem.data(0, Qt.UserRole).value
-        self.textEditSql.insertPlainText(f' {sheet_name} ')
+        self.plainTextSql.insertPlainText(f' {sheet_name} ')
     
     def _treeWidgetItem_popContextMenu_ShowSheetData(self, currentItem) -> None:
         '''查看表格数据'''
@@ -137,19 +129,23 @@ class MyApp(QMainWindow, Ui_MainWindow):
         '''从列表中移除此表'''
         sheet_name = currentItem.data(0, Qt.UserRole).value
         self._remove_sheet_node(currentItem)
+        self._update_tables_name()
         self.statusbar.showMessage(f'从列表中移除此表成功：{sheet_name}')
     
     def _treeWidgetItem_popContextMenu_InsertFieldName(self, currentItem) -> None:
         '''字段名称插入到SQL'''
         field_name = currentItem.data(0, Qt.UserRole).value
-        self.textEditSql.insertPlainText(f' {field_name} ')
+        self.plainTextSql.insertPlainText(f' {field_name} ')
     
     def _treeWidgetItem_popContextMenu_InsertFieldNameWithComma(self, currentItem) -> None:
         '''字段名称插入到SQL'''
         field_name = currentItem.data(0, Qt.UserRole).value
-        self.textEditSql.insertPlainText(f' {field_name}, ')
+        self.plainTextSql.insertPlainText(f' {field_name}, ')
 
     def _treeWidgetItem_popContextMenu(self, pos) -> None:
+        '''
+        右键菜单响应
+        '''
         currentItem = self.treeWidgetExcelsAndSheets.currentItem()
         pos_item = self.treeWidgetExcelsAndSheets.itemAt(pos)
         if currentItem and pos_item:
@@ -196,6 +192,10 @@ class MyApp(QMainWindow, Ui_MainWindow):
         if query_result:
             tables_name = [row[0] for row in query_result]
         return tables_name
+
+    def _update_tables_name(self) -> None:
+        tables_name = self._get_db_tables_name()
+        self._highlighter.update_tables_name(tables_name)
 
     def _add_sheet_node(self, sheet_name, parent, df: pandas.DataFrame) -> None:
         # 创建一个表，先判断表名是否冲突，如果冲突分配一个新名字
@@ -244,6 +244,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
                 for sheet in sheet_names:
                     self._add_sheet_node(sheet, new_field_node, dfs[sheet])
                 self._conn.commit()
+                self._update_tables_name()
                 t2 = time.time()
                 self.statusbar.showMessage(f'导入Excel文件【{pname}】成功！用时[{(t2 - t1):.2f}s]')
             except Exception as ex:
@@ -254,20 +255,15 @@ class MyApp(QMainWindow, Ui_MainWindow):
             self.statusbar.showMessage(f'未选择有效的Excel文件！')
 
 
-    def textEditSql_textChanged(self):
-        # logging.info('textEditSql_textChanged')
-        # 先解绑处理函数，重新赋值后再绑定
-        # self.textEditSql.textChanged.disconnect(self.textEditSql_textChanged)
-        # text = self.textEditSql.toPlainText()
-        # md_text = f'``` sql\n{text}\n```'
-        # html = markdown.markdown(md_text)
-        # self.textEditSql.setHtml(html)
-        # # self.textEditSql.setPlainText(text)
-        # self.textEditSql.textChanged.connect(self.textEditSql_textChanged)
+    def plainTextSql_textChanged(self):
         pass
 
-    def pushButtonFormatSql_clicked(self):
-        self.statusbar.showMessage('todo') # todo
+    def plainTextSql_dragEnterEvent(self, e):
+        logging.debug('_plainTextSql_dragEnterEvent', e)
+        e.accept()
+
+    # def pushButtonFormatSql_clicked(self):
+    #     self.statusbar.showMessage('todo') # todo
 
     def _show_query_result(self) -> None:
         self.tableWidgetSqlResult.setColumnCount(len(self._query_columns))
@@ -284,7 +280,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.tableWidgetSqlResult.clear()
         self.tableWidgetSqlResult.setColumnCount(0)
         self.tableWidgetSqlResult.setRowCount(0)
-        sql = self.textEditSql.toPlainText().strip()
+        sql = self.plainTextSql.toPlainText().strip()
         if not sql:
             QMessageBox.information(self, '执行SQL', 'SQL内容为空！', QMessageBox.Yes, QMessageBox.Yes)
             return
@@ -347,6 +343,18 @@ class MyApp(QMainWindow, Ui_MainWindow):
     def _show_file_in_folder(self, fpath) -> None:
         cmd = f'explorer /select,"{Path(fpath)}"' # qt的path是/格式的，需要转换成windows的\格式
         os.popen(cmd) # 打开文件目录，这里不用os.system因为会有一个黑框一闪而过
+    
+    def dragEnterEvent(self, e: QDragEnterEvent) -> None:
+        '''拖动事件'''
+        e.accept()
+        
+    def dropEvent(self, e: QDropEvent) -> None:
+        '''拖动释放事件'''
+        currentItem = self.treeWidgetExcelsAndSheets.currentItem()
+        if currentItem:
+            node_data: TreeNodeData = currentItem.data(0, Qt.UserRole)
+            if node_data.node_type in (TreeNodeType.Sheet, TreeNodeType.Field):
+                self.plainTextSql.insertPlainText(f' {node_data.value} ')
 
 if __name__ == '__main__':
     qt_app = QApplication(sys.argv)

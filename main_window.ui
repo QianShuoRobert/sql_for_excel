@@ -6,31 +6,60 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1057</width>
+    <width>1066</width>
     <height>811</height>
    </rect>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
   </property>
   <property name="windowTitle">
    <string>SQL for Excel v1.0</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_4">
+   <layout class="QGridLayout" name="gridLayout_5">
     <item row="0" column="0">
      <widget class="QSplitter" name="splitter_2">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
       <widget class="QSplitter" name="splitter">
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
        <widget class="QGroupBox" name="groupBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
         <property name="title">
          <string>Excel文件和表</string>
         </property>
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="0">
           <spacer name="horizontalSpacer">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -44,6 +73,11 @@
          </item>
          <item row="0" column="1">
           <widget class="QPushButton" name="pushButtonImportFile">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>导入</string>
            </property>
@@ -51,11 +85,37 @@
          </item>
          <item row="1" column="0" colspan="3">
           <widget class="QTreeWidget" name="treeWidgetExcelsAndSheets">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+           <property name="acceptDrops">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string/>
            </property>
            <property name="showDropIndicator" stdset="0">
             <bool>true</bool>
+           </property>
+           <property name="dragEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="dragDropOverwriteMode">
+            <bool>false</bool>
+           </property>
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::DragOnly</enum>
+           </property>
+           <property name="defaultDropAction">
+            <enum>Qt::IgnoreAction</enum>
+           </property>
+           <property name="columnCount">
+            <number>2</number>
            </property>
            <attribute name="headerVisible">
             <bool>true</bool>
@@ -65,55 +125,96 @@
              <string notr="true">1</string>
             </property>
            </column>
+           <column>
+            <property name="text">
+             <string notr="true">2</string>
+            </property>
+           </column>
           </widget>
          </item>
         </layout>
        </widget>
        <widget class="QGroupBox" name="groupBox_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
         <property name="title">
          <string>SQL</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="2">
-          <widget class="QPushButton" name="pushButtonRunSql">
-           <property name="text">
-            <string>执行</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QPushButton" name="pushButtonFormatSql">
-           <property name="text">
-            <string>格式化</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0">
           <spacer name="horizontalSpacer_2">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>332</width>
+             <width>501</width>
              <height>20</height>
             </size>
            </property>
           </spacer>
          </item>
-         <item row="1" column="0" colspan="3">
-          <widget class="QTextEdit" name="textEditSql"/>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="pushButtonRunSql">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>执行</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="2">
+          <widget class="QPlainTextEdit" name="plainTextSql">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
       </widget>
       <widget class="QGroupBox" name="groupBox_3">
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
        <property name="title">
         <string>执行结果</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="0">
          <spacer name="horizontalSpacer_3">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -127,16 +228,32 @@
         </item>
         <item row="0" column="1">
          <widget class="QLabel" name="label">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>结果导出为新的Excel表格</string>
           </property>
          </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QLineEdit" name="lineEditNewSheetName"/>
+         <widget class="QLineEdit" name="lineEditNewSheetName">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+         </widget>
         </item>
         <item row="0" column="3">
          <widget class="QPushButton" name="pushButtonExportResult">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
           <property name="toolTip">
            <string>导出SQL的查询结果，不对以下表格中的修改导出！</string>
           </property>
@@ -147,6 +264,11 @@
         </item>
         <item row="1" column="0" colspan="4">
          <widget class="QTableWidget" name="tableWidgetSqlResult">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
           <property name="toolTip">
            <string>注意：修改的内容不会被保存和导出！</string>
           </property>
@@ -161,5 +283,79 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>pushButtonImportFile</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>pushButtonImportFile_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>481</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>448</x>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonRunSql</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>pushButtonRunSql_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>987</x>
+     <y>44</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>927</x>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonExportResult</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>pushButtonExportResult_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>988</x>
+     <y>430</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1051</x>
+     <y>337</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>treeWidgetExcelsAndSheets</sender>
+   <signal>customContextMenuRequested(QPoint)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>_treeWidgetItem_popContextMenu(QPoint)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>322</x>
+     <y>135</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>332</x>
+     <y>-12</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>pushButtonImportFile_clicked()</slot>
+  <slot>pushButtonRunSql_clicked()</slot>
+  <slot>pushButtonFormatSql_clicked()</slot>
+  <slot>textEditSql_textChanged()</slot>
+  <slot>pushButtonExportResult_clicked()</slot>
+  <slot>_treeWidgetItem_popContextMenu(QPoint)</slot>
+  <slot>_treeWidgetItem_itemClicked()</slot>
+ </slots>
 </ui>
