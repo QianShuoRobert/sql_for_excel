@@ -67,7 +67,7 @@ class SqlHighlighter(QSyntaxHighlighter):
         class_format = QTextCharFormat()
         class_format.setFontWeight(QFont.Bold)
         class_format.setForeground(Qt.darkRed)
-        pattern = r'\b(?i:{})\s'.format('|'.join(self._keywords))
+        pattern = r'\b(?i:{})\b'.format('|'.join(self._keywords))
         self._add_mapping(pattern, class_format)
         # [xxxx]
         function_format = QTextCharFormat()
